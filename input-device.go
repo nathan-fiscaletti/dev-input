@@ -35,20 +35,16 @@ func ListKeyboards() ([]*Device, error) {
 
 keyboardCheck:
 	for _, device := range devices {
-		if !device.SupportsEvent(EV_KEY) || device.SupportsEvent(EV_REL) || device.SupportsEvent(EV_ABS) {
-			continue
-		}
-
-		// Check for common key codes, Escape, A, B, C and Enter
-		common := []int{1, 30, 46, 48, 28}
-
-		for _, key := range common {
-			if !device.SupportsKey(key) {
-				continue keyboardCheck
+		if device.SupportsEvent(EV_KEY) {
+			common := []int{1, 30, 46, 48, 28}
+			for _, key := range common {
+				if !device.SupportsKey(key) {
+					continue keyboardCheck
+				}
 			}
-		}
 
-		keyboards = append(keyboards, device)
+			keyboards = append(keyboards, device)
+		}
 	}
 
 	return keyboards, nil
