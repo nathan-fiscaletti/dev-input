@@ -33,6 +33,7 @@ func ListKeyboards() ([]*Device, error) {
 		return nil, err
 	}
 
+keyboardCheck:
 	for _, device := range devices {
 		if !device.SupportsEvent(EV_KEY) || device.SupportsEvent(EV_REL) || device.SupportsEvent(EV_ABS) {
 			continue
@@ -43,7 +44,7 @@ func ListKeyboards() ([]*Device, error) {
 
 		for _, key := range common {
 			if !device.SupportsKey(key) {
-				continue
+				continue keyboardCheck
 			}
 		}
 
