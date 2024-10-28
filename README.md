@@ -33,7 +33,7 @@ func main() {
 
 	for _, keyboard := range keyboards {
 		fmt.Printf("Keyboard: %s\n", keyboard.Name)
-    }
+	}
 }
 ```
 
