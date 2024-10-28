@@ -70,6 +70,42 @@ func ListPointerDevices() ([]*Device, error) {
 	return pointers, nil
 }
 
+// ListMice returns a list of Devices that support the EV_REL event type. These are normally mice.
+func ListMice() ([]*Device, error) {
+	devices, err := ListDevices()
+	if err != nil {
+		return nil, err
+	}
+
+	mice := []*Device{}
+
+	for _, device := range devices {
+		if device.SupportsEvent(EV_REL) {
+			mice = append(mice, device)
+		}
+	}
+
+	return mice, nil
+}
+
+// ListTouchDevices returns a list of Devices that support the EV_ABS event type. These are normally touch-pads/track-pads.
+func ListTouchPads() ([]*Device, error) {
+	devices, err := ListDevices()
+	if err != nil {
+		return nil, err
+	}
+
+	touchPads := []*Device{}
+
+	for _, device := range devices {
+		if device.SupportsEvent(EV_ABS) {
+			touchPads = append(touchPads, device)
+		}
+	}
+
+	return touchPads, nil
+}
+
 // GetDevice reads and returns metadata for a specific input device.
 func GetDevice(eventID int) (*Device, error) {
 	basePath := fmt.Sprintf("/sys/class/input/event%d/device", eventID)
