@@ -151,7 +151,7 @@ func ListDevices() ([]*Device, error) {
 		device, err := GetDevice(i)
 		if err != nil {
 			if !errors.Is(err, os.ErrNotExist) {
-				return nil, fmt.Errorf("Failed to get input device: %v\n", err)
+				return nil, fmt.Errorf("failed to get input device: %v", err)
 			}
 
 			// Stop if we run out of devices (no such file/directory)
@@ -212,15 +212,16 @@ func (d *Device) Close() error {
 	return nil
 }
 
-// ListenWithChannel listens for events on the device and writes them to the channel.
-func (d *Device) ListenWithChannel(ctx context.Context, eventChan *chan Event) error {
+// AttachChannel listens for events on the device and writes them to the channel.
+func (d *Device) AttachChannel(ctx context.Context, eventChan chan Event) error {
 	err := d.Open()
 	if err != nil {
-		return fmt.Errorf("Error opening device: %v\n", err)
+		return fmt.Errorf("error opening device: %v", err)
 	}
 
 	go func() {
 		defer d.Close()
+		defer close(eventChan)
 
 		for {
 			if ctx.Err() != nil {
@@ -230,29 +231,36 @@ func (d *Device) ListenWithChannel(ctx context.Context, eventChan *chan Event) e
 			var event Event
 			err := d.Read(&event)
 			if err != nil {
-				close(*eventChan)
-				*eventChan = nil
 				return
 			}
-			*eventChan <- event
+			eventChan <- event
 		}
 	}()
 
 	return nil
 }
 
+// Deprecated: Use AttachChannel
+func (d *Device) ListenWithChannel(ctx context.Context, eventChan chan Event) error {
+	return d.AttachChannel(ctx, eventChan)
+}
+
 // Listen listens for events on the device and calls the handler for each event. This function will block until the context is canceled.
 func (d *Device) Listen(ctx context.Context, handler Handler) error {
 	eventChan := make(chan Event)
-	err := d.ListenWithChannel(ctx, &eventChan)
+	err := d.AttachChannel(ctx, eventChan)
 	if err != nil {
 		return err
 	}
 
 	go func() {
 		for {
-			event := <-eventChan
-			handler(event)
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				handler(<-eventChan)
+			}
 		}
 	}()
 
