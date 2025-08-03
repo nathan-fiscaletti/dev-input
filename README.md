@@ -7,12 +7,12 @@ This is a simple package for communicating with the Linux input filesystem.
 
 ## Features
 
+- Read events from input devices
 - List input devices
 - Filter input devices by event
-  - Build in filters for keyboards, pointers and touch-pads
+  - Built in filters for keyboards, pointers and touch-pads
 - Check if a device supports a particular event
 - Check if a device supports a particular key-code
-- Read events from input devices
 
 ## Usage
 
@@ -36,5 +36,6 @@ func main() {
 	}
 }
 ```
+
 
 See the [Go Docs](https://godoc.org/github.com/nathan-fiscaletti/dev-input) for more detailed usage.
